@@ -34,7 +34,7 @@ class LeafletMapPicker extends Field
 
     protected string | Closure $markerShadowPath = '';
 
-    protected bool $showTileControl = true;
+    protected bool | Closure $showTileControl = true;
 
     private int $precision = 8;
 
@@ -55,7 +55,7 @@ class LeafletMapPicker extends Field
         'customMarker' => null,
         'markerIconPath' => '',
         'markerShadowPath' => '',
-        'showTaleControl' => false,
+        'showTileControl' => false,
     ];
 
     public function hideTileControl(): static
@@ -67,7 +67,7 @@ class LeafletMapPicker extends Field
 
     public function getTileControlVisibility(): bool
     {
-        return $this->evaluate($this->showTileControl);
+        return (bool) $this->evaluate($this->showTileControl);
     }
 
     public function customMarker(array $config): static
@@ -131,7 +131,7 @@ class LeafletMapPicker extends Field
 
     public function getDraggable(): bool
     {
-        if ($this->isDisabled || $this->isReadOnly) {
+        if ($this->isDisabled() || $this->isReadOnly()) {
             return false;
         }
 
@@ -147,7 +147,7 @@ class LeafletMapPicker extends Field
 
     public function getClickable(): bool
     {
-        if ($this->isDisabled || $this->isReadOnly) {
+        if ($this->isDisabled() || $this->isReadOnly()) {
             return false;
         }
 
@@ -229,7 +229,7 @@ class LeafletMapPicker extends Field
     /**
      * @throws JsonException
      */
-    public function getMapConfig(): string
+    public function getMapConfig_old(): string
     {
         return json_encode(
             array_merge($this->mapConfig, [
@@ -251,6 +251,28 @@ class LeafletMapPicker extends Field
             JSON_THROW_ON_ERROR
         );
     }
+
+    public function getMapConfig(): string
+    {
+        return json_encode([
+            'draggable'             => $this->getDraggable(),
+            'clickable'             => $this->getClickable(),
+            'defaultLocation'       => $this->getDefaultLocation(),
+            'statePath'             => $this->getStatePath(),
+            'defaultZoom'           => $this->getDefaultZoom(),
+            'myLocationButtonLabel' => $this->getMyLocationButtonLabel(),
+            'tileProvider'          => $this->getTileProvider(),
+            'customTiles'           => $this->getCustomTiles(),
+            'customMarker'          => $this->getCustomMarker(),
+            'markerIconPath'        => $this->getMarkerIconPath(),
+            'markerShadowPath'      => $this->getMarkerShadowPath(),
+            'map_type_text'         => __('filament-leaflet-map-picker::leaflet-map-picker.map_type'),
+            'is_disabled'           => $this->isDisabled() || $this->isReadOnly(),
+            'showTileControl'       => $this->getTileControlVisibility(),
+        ], JSON_THROW_ON_ERROR);
+    }
+
+
 
     /**
      * @throws JsonException
